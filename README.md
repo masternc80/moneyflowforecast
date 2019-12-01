@@ -1,2 +1,2 @@
 # moneyflowforecast
-Money Flow Forecast application, UI &amp; backend
+Money Flow Forecast application, backend (Java+Spring+MySQL/hibernate)

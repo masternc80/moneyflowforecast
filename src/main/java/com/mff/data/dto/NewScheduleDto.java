@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -14,14 +15,12 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewScheduleDto {
+public class NewScheduleDto implements ConvertibleDto<Schedule> {
 
     @NotNull
-    @NonNull
     private Boolean isPeriodic;
 
     @NotNull
-    @NonNull
     private String name;
 
     private Integer periodLength;
@@ -33,6 +32,12 @@ public class NewScheduleDto {
     private Integer baseDayOfMonth;
 
     @NotNull
-    @NonNull
     private Boolean isPriorWeekend;
+
+    @Override
+    public Schedule toEntity() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        return mapper.map(this, Schedule.class);
+    }
 }

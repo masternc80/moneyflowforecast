@@ -1,12 +1,8 @@
 package com.mff.controllers;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,71 +49,64 @@ public class ForecastController {
 		TreeMap<Integer, List<Schedule>> recordDays = new TreeMap<>();
 
 		for (Schedule s : scheduleFactory.getAll()) {
-			/*
-			int day = scheduleFactory.generateDate(s, prevMonth.get(MONTH), prevMonth.get(YEAR));
-			if (day > prevdays) {
-				if (recordDays.containsKey(day - prevdays)) {
-					recordDays.get(day - prevdays).add(s);
-				} else {
-					recordDays.put(day - prevdays, Arrays.asList(s));
-				}
+			Date day = scheduleFactory.generateDate(s, now.get(MONTH), now.get(YEAR));
+			GregorianCalendar cal = new GregorianCalendar();
+			cal.setTime(day);
+			if (recordDays.containsKey(cal.get(DAY_OF_MONTH))) {
+				recordDays.get(cal.get(DAY_OF_MONTH)).add(s);
+			} else {
+				recordDays.put(cal.get(DAY_OF_MONTH), Arrays.asList(s));
 			}
-			day = scheduleFactory.generateDate(s, now.get(MONTH), now.get(YEAR));
-			if (day > 0) {
-				if (recordDays.containsKey(day)) {
-					recordDays.get(day).add(s);
-				} else {
-					recordDays.put(day, Arrays.asList(s));
-				}
-			}
-			day = scheduleFactory.generateDate(s, nextMonth.get(MONTH), nextMonth.get(YEAR));
-			if (day <= 0) {
-				if (recordDays.containsKey(day + days)) {
-					recordDays.get(day + days).add(s);
-				} else {
-					recordDays.put(day + days, Arrays.asList(s));
-				}
-			}
-			*/
 		}
 		double curBalance = initialBalance;
-		SimpleDateFormat dt = new SimpleDateFormat("dd-MMM"); 
+		SimpleDateFormat dt = new SimpleDateFormat("dd-MMM");
+		SimpleDateFormat dtv = new SimpleDateFormat("YYYY-MM-dd");
+		long id = 1;
 		for (int i : recordDays.keySet()) {
 			List<Schedule> todaySchedules = recordDays.get(i);
 			for (Schedule s : todaySchedules) {
 				LinkedList<RecurringTransaction> rs = new LinkedList<>();
-				for (RecurringTransaction rt : recurringTransactionRepository.findAllByScheduleId(s.getId())) {
-					if (rt.isCredit()) {
+				for (RecurringTransaction rt : recurringTransactionRepository.findAllBySchedulesIdIs(s.getId())) {
+					if (rt.getAmount() > 0) {
 						curBalance += rt.getAmount();
 						records.add(ForecastRecord.builder()
+								.id(id++)
 								.recordDate(dt.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
-								.description(rt.getDescription())
+								.recordDateValue(dtv.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
+								.description(rt.getName())
 								.credit(rt.getAmount())
 								.debit(0)
 								.balance(curBalance)
+								.past(false)
 								.build());
 					} else {
 						rs.add(rt);
 					}
 				}
 				for (RecurringTransaction rt : rs) {
-					curBalance -= rt.getAmount();
+					curBalance += rt.getAmount();
 					records.add(ForecastRecord.builder()
+							.id(id++)
 							.recordDate(dt.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
-							.description(rt.getDescription())
+							.recordDateValue(dtv.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
+							.description(rt.getName())
 							.credit(0)
-							.debit(rt.getAmount())
+							.debit(-rt.getAmount())
 							.balance(curBalance)
+							.past(false)
 							.build());
 				}
 				for (Account a : accountRepository.findAllByScheduleId(s.getId())) {
 					curBalance -= a.getStatementBalance();
 					records.add(ForecastRecord.builder()
+							.id(id++)
 							.recordDate(dt.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
+							.recordDateValue(dtv.format(new GregorianCalendar(now.get(YEAR), now.get(MONTH), i).getTime()))
 							.description(a.getName())
 							.credit(0)
 							.debit(a.getStatementBalance())
 							.balance(curBalance)
+							.past(false)
 							.build());
 				}
 			}

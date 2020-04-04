@@ -6,6 +6,6 @@ import com.mff.data.entities.Account;
 
 public interface AccountRepository extends CrudRepository<Account, Integer> {
 
-	public Iterable<Account> findAllByScheduleId(int scheduleId);
-	public long countByScheduleId(int scheduleId);
+	Iterable<Account> findAllByScheduleId(int scheduleId);
+	long countByScheduleId(int scheduleId);
 }

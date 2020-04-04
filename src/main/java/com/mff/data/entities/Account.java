@@ -12,17 +12,21 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.mff.data.dto.AccountDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Account {
+public class Account implements ConvertibleEntity<AccountDto> {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -54,8 +58,16 @@ public class Account {
     @ManyToOne
     @JoinColumn
 	private Schedule schedule;
-	
-    @OneToMany
-    @JoinColumn
-	private List<Transaction> transactions;
+
+	@Override
+	public AccountDto toDto() {
+		ModelMapper mapper = new ModelMapper();
+		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		Converter<Schedule, Integer> generateSchedule = ctx -> ctx.getSource().getId();
+		mapper.createTypeMap(Account.class, AccountDto.class)
+				.addMappings(m -> m.using(generateSchedule)
+						.map(Account::getSchedule, AccountDto::setScheduleId));
+		return mapper.map(this, AccountDto.class);
+	}
+
 }

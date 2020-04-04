@@ -11,11 +11,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.mff.data.dto.ConvertibleDto;
+import com.mff.data.dto.TransactionDto;
 import lombok.Data;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 @Data
 @Entity
-public class Transaction {
+public class Transaction implements ConvertibleDto<TransactionDto> {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
@@ -32,4 +37,16 @@ public class Transaction {
 	private double amount;
 	
 	private String description;
+
+	@Override
+	public TransactionDto toEntity() {
+		ModelMapper mapper = new ModelMapper();
+		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		Converter<Account, String> convertAccount = ctx ->
+				Integer.toString(ctx.getSource().getId());
+		mapper.createTypeMap(Transaction.class, TransactionDto.class)
+				.addMappings(m -> m.using(convertAccount)
+						.map(Transaction::getAccount, TransactionDto::setAccountId));
+		return mapper.map(this, TransactionDto.class);
+	}
 }

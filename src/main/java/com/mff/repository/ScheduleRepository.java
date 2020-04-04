@@ -4,7 +4,8 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.mff.data.entities.Schedule;
 
-public interface ScheduleRepository extends CrudRepository<Schedule, Integer> {
-	public Schedule findByBaseDayOfMonthAndIsPriorWeekend(int dayOfMonth, boolean isPriorWeekend);
+import java.util.List;
 
+public interface ScheduleRepository extends CrudRepository<Schedule, Integer> {
+	Schedule findByBaseDayOfMonthAndIsPriorWeekend(int dayOfMonth, boolean isPriorWeekend);
 }

@@ -7,7 +7,11 @@ import lombok.Data;
 @Builder
 public class ForecastRecord {
 
+	private long id;
+
 	private String recordDate;
+
+	private String recordDateValue;
 	
 	private double credit;
 	
@@ -16,4 +20,6 @@ public class ForecastRecord {
 	private String description;
 	
 	private double balance;
+
+	private Boolean past;
 }

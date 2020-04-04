@@ -1,10 +1,9 @@
 package com.mff.data.dto;
 
 import com.mff.data.entities.Schedule;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -13,10 +12,10 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduleDto {
+public class ScheduleDto implements ConvertibleDto<Schedule> {
 
     @NotNull
-    private Integer id;
+    private int id;
 
     @NotNull
     private String name;
@@ -38,4 +37,11 @@ public class ScheduleDto {
     private Date nextDate;
 
     private Boolean canDelete;
+
+    @Override
+    public Schedule toEntity() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        return mapper.map(this, Schedule.class);
+    }
 }

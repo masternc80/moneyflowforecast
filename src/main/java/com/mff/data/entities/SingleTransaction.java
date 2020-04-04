@@ -21,8 +21,6 @@ public class SingleTransaction {
 	@Temporal(TemporalType.DATE)
 	private Date date;
 
-	private boolean credit;
-	
 	private double amount;
 	
 	private String description;

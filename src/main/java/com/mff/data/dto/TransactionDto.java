@@ -2,6 +2,7 @@ package com.mff.data.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -10,7 +11,7 @@ import java.util.Date;
 public class TransactionDto {
     private int id;
 
-    private String account_id;
+    private String accountId;
 
     private Date date;
 
